@@ -105,3 +105,46 @@ This project uses a Python virtual environment in `venv/`. Always activate befor
 ```bash
 source venv/bin/activate
 ```
+
+## Testing
+
+### Running Tests
+
+The project includes comprehensive unit tests for all API endpoints:
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run all tests
+pytest test_main.py
+
+# Run with verbose output
+pytest test_main.py -v
+
+# Run with coverage report
+pytest test_main.py --cov=app --cov-report=term-missing
+```
+
+### Test Coverage
+
+The test suite (`test_main.py`) covers:
+
+1. **Home Endpoint** - Verifies welcome message
+2. **Daily Phrase Endpoint**:
+   - Returns correct structure (date, text, author)
+   - Deterministic behavior for a given date
+   - Different phrases for different dates
+   - Handles empty database gracefully
+3. **Random Phrase Endpoint**:
+   - Returns single phrase with correct structure
+   - Returns valid phrases from database
+   - Can return different phrases on multiple requests
+4. **All Phrases Endpoint**:
+   - Returns correct structure (total, phrases)
+   - Accurate count matching actual phrases
+   - All phrases included in response
+   - Correct format (text/author, no IDs)
+   - Handles empty database
+
+Tests use mocking to avoid file I/O and ensure deterministic behavior.
