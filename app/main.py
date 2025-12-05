@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import TOTAL_VERSES  # , VERSES
 from app.routes import stats, verses
@@ -11,12 +12,28 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# CORS
+origins = [
+    "*",  # todos los orígenes
+    "http://localhost",
+    "http://localhost:3000",  # Para desarrollo de frontend en React, Vue, etc.
+    # "https://tu-frontend.onrender.com",  # Si tienes un frontend desplegado
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # (GET, POST, etc.)
+    allow_headers=["*"],
+)
+
 # Incluir routers
 app.include_router(verses.router)
 app.include_router(stats.router)
 
 
-@app.get("/", tags=["Raíz"])
+@app.get("/", tags=["Main"])
 def root():
     """
     Página principal con información de la API.
@@ -41,6 +58,6 @@ def startup_event():
     """
     Evento al iniciar la aplicación.
     """
-    print(f"✅ API iniciada con {TOTAL_VERSES:,} versículos cargados")
+    print(f"API iniciada con {TOTAL_VERSES:,} versículos cargados")
     if TOTAL_VERSES == 0:
-        print("⚠️  Advertencia: No se cargaron versículos")
+        print("Advertencia: No se cargaron versículos")
