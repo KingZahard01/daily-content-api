@@ -1,62 +1,63 @@
-import json
-import random
-from datetime import date
-
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Frase Diaria", version="1.0.0")
+from app.database import TOTAL_VERSES  # , VERSES
+from app.routes import stats, verses
 
-# cargar la base de datos
-with open("app/database.json", "r", encoding="utf-8") as f:
-    PHRASES = json.load(f)
+app = FastAPI(
+    title="Frase Bíblica Diaria API",
+    version="1.0.0",
+    description="API de versículos bíblicos Reina Valera 1909",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# CORS
+origins = [
+    "*",  # todos los orígenes
+    "http://localhost",
+    "http://localhost:3000",  # Para desarrollo de frontend en React, Vue, etc.
+    # "https://tu-frontend.onrender.com",  # Si tienes un frontend desplegado
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # (GET, POST, etc.)
+    allow_headers=["*"],
+)
+
+# Incluir routers
+app.include_router(verses.router)
+app.include_router(stats.router)
 
 
-@app.get("/")
-def home():
+@app.get("/", tags=["Main"])
+def root():
     """
-    Obtiene la página de inicio.
+    Página principal con información de la API.
     """
-    return {"message": "Welcome to Frase Diaria"}
-
-
-@app.get("/daily-phrase")
-def daily_phrase():
-    """
-    Obtiene una frase del día.
-    """
-    if not PHRASES:  # Manejo de errores
-        return {"error": "No phrases available"}
-
-    index = date.today().toordinal() % len(PHRASES)
-    phrase = PHRASES[index]
     return {
-        "date": str(date.today()),
-        "text": phrase["texto"],
-        "author": phrase["autor"],
+        "message": "Bienvenido a Frase Bíblica Diaria API",
+        "description": "API completa de la Biblia Reina Valera 1909",
+        "total_verses": TOTAL_VERSES,
+        "endpoints": {
+            "documentación": "/docs",
+            "versículo_diario": "/api/daily-verse",
+            "versículo_aleatorio": "/api/random-verse",
+            "búsqueda": "/api/verses?book=Genesis",
+            "versículo_específico": "/api/verse/Genesis/1/1",
+            "estadísticas": "/api/stats",
+        },
     }
 
 
-@app.get("/phrase-random")
-def frase_random():
+@app.on_event("startup")
+def startup_event():
     """
-    Obtiene una frase aleatoria.
+    Evento al iniciar la aplicación.
     """
-    phrase = random.choice(PHRASES)
-    return {
-        "text": phrase["texto"],
-        "author": phrase["autor"],
-    }
-
-
-@app.get("/phrases")
-def all_phrases():
-    """
-    Obtiene todas las frases.
-    """
-    return {
-        "total": len(PHRASES),
-        "phrases": [
-            {"text": phrase["texto"], "author": phrase["autor"]}
-            for phrase in PHRASES  # para cada frase en la lista de frases
-        ],
-    }
+    print(f"API iniciada con {TOTAL_VERSES:,} versículos cargados")
+    if TOTAL_VERSES == 0:
+        print("Advertencia: No se cargaron versículos")
