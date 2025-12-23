@@ -30,7 +30,7 @@ Public REST API that delivers daily and random content entries from a large stru
 ---
 
 ## 🌍 Live API
-Base URL: https://daily-content-api.onrender.com
+Base URL: https://daily-phrase.onrender.com/
 
 Documentation: /docs
 
